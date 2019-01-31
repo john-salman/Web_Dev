@@ -1,0 +1,56 @@
+const fs = require('fs');
+
+
+function cacluateTotalStudentsEnrolled(courses) {
+    let totalStudents = 0;
+    for (let course in courses) {
+        totalStudents += courses[course]['total_enrolled'];
+    }
+    return totalStudents;
+}
+
+function findAllInstructors(courses) {
+    let components = {};
+    let instructors = [];
+    for (let course in courses) {
+//        console.log(courses[course]);
+        let course_components = courses[course]['components'];
+        //console.log(course_components);
+        course_components.forEach(function (current) {
+            //console.log(courses[course][current]);
+            let current_component = courses[course][current];
+            console.log(current_component);
+            if ( !(current_component['instructors'][0]['instructor_id'] in instructors) {
+                instructors.push(current_component['instructors'][0]['instructor_id'])
+            }
+        });
+        /*for (let current_course in course_components ) {
+            //if (courses[comp]['instructors']['instructor_id'] !== null) {
+            //let current = courses[course][comp];
+            console.log(current_course)
+            //components.push(compopo, courses['subject'], courses['section'], courses['course_title'], courses['catalog'], courses['ftes'], courses['units'], courses['total_enrolled']);
+
+        }
+        */
+    }
+    return instructors;
+}
+
+function findInstructorCourses (instructors, courses) {
+    let instr_courses = {};
+    for (let course in courses) {
+        let current_class = course['class_number'];
+        if (instr_courses[current_class] === undefined) {
+            // put stuff here lol
+        }
+    }
+
+}
+
+const contents = fs.readFileSync('./courses_studentView_2193_ComputerScience.json', 'utf8');
+let courses = JSON.parse(contents);
+
+let totalStudents = cacluateTotalStudentsEnrolled(courses);
+let componon = findAllInstructors(courses);
+console.log(componon);
+console.log(totalStudents);
