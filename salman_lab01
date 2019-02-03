@@ -18,39 +18,67 @@ function findAllInstructors(courses) {
         //console.log(course_components);
         course_components.forEach(function (current) {
             //console.log(courses[course][current]);
-            let current_component = courses[course][current];
-            console.log(current_component);
-            if ( !(current_component['instructors'][0]['instructor_id'] in instructors) {
-                instructors.push(current_component['instructors'][0]['instructor_id'])
+            let current_instr = courses[course][current]['instructors'][0];
+            console.log(current_instr);
+            if (instructors[current_instr['instructor_id']] === undefined) {
+                //instructors[current_instr['instructor_id']] = [];
+                instructors[current_instr['instructor_id']] = current_instr;
             }
         });
-        /*for (let current_course in course_components ) {
-            //if (courses[comp]['instructors']['instructor_id'] !== null) {
-            //let current = courses[course][comp];
-            console.log(current_course)
-            //components.push(compopo, courses['subject'], courses['section'], courses['course_title'], courses['catalog'], courses['ftes'], courses['units'], courses['total_enrolled']);
-
-        }
-        */
     }
     return instructors;
 }
 
-function findInstructorCourses (instructors, courses) {
-    let instr_courses = {};
-    for (let course in courses) {
-        let current_class = course['class_number'];
-        if (instr_courses[current_class] === undefined) {
-            // put stuff here lol
-        }
-    }
+function findInstructorCourses(courses) {}
 
+
+function organizeCourses (instructors, courses) {
+    for (let course in courses) {
+        let course_instr = [];
+        let org_courses = [];
+
+        let current_course = courses[course];
+        console.log("dogs: ", current_course)
+        let course_components = courses[course]['components'];
+
+        course_components.forEach(function (current_comp) {
+            let current = courses[course][current_comp];
+            let current_class = current['class_number'];
+            course_instr.push(current['instructors'][0]['instructor_id']);
+            org_courses[current_class] = {
+                    Subject: current_course['subject'],
+                    Catalog: current_course['catalog'],
+                    Section: current_comp['section'],
+                    Component: current_comp,
+                    Title: current_course['course_title'],
+                    Instructor: current['instructors'][0]['instructor_lName'] + ", " + current['instructors'][0]['instructor_fName'],
+                    WTU: current['instructors'][0]['wtu'],
+                    Units: current_course['units'],
+                    Pattern: current['meeting_pattern'][0]['meeting_pattern'],
+                    Start: current['meeting_pattern'][0]['start_time'],
+                    End: current['meeting_pattern'][0]['end_time'],
+                    Room: current['meeting_pattern'][0]['facility_name'],
+                    Enrollment: current_course['total_enrolled'],
+                    FTES: current_course['ftes']
+            };
+        });
+
+        course_instr.forEach(function(current_id) {
+            console.log(instructors[current_id]);
+            org_courses.forEach(function (current_class) {
+                instructors[current_id] += org_courses[current_class];
+            });
+        });
+
+    }
+    return instructors;
 }
 
 const contents = fs.readFileSync('./courses_studentView_2193_ComputerScience.json', 'utf8');
 let courses = JSON.parse(contents);
 
 let totalStudents = cacluateTotalStudentsEnrolled(courses);
-let componon = findAllInstructors(courses);
-console.log(componon);
-console.log(totalStudents);
+let cs_instructors = findAllInstructors(courses);
+let org_courses = organizeCourses(cs_instructors, courses);
+
+console.log(org_courses);
