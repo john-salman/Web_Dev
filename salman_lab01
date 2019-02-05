@@ -1,44 +1,44 @@
+// Author: John Salman
+// Assignment: Lab 01 CS386 Spring 2019
+// Description: This program connects Computer Science Professors to
+//              the courses they teach, or are associated with in
+//              some capacity. It then prints this collection to the
+//              console.
+
 const fs = require('fs');
 
-
-function cacluateTotalStudentsEnrolled(courses) {
-    let totalStudents = 0;
-    for (let course in courses) {
-        totalStudents += courses[course]['total_enrolled'];
-    }
-    return totalStudents;
-}
-
 function findAllInstructors(courses) {
-    let components = {};
-    let instructors = [];
+    // This function finds all instructors and stores their information in a
+    // array of new objects. This object will contain an empty array for storing
+    // associated courses.
+    let instructors = {};
     for (let course in courses) {
-//        console.log(courses[course]);
         let course_components = courses[course]['components'];
-        //console.log(course_components);
         course_components.forEach(function (current) {
-            //console.log(courses[course][current]);
             let current_instr = courses[course][current]['instructors'][0];
-            console.log(current_instr);
             if (instructors[current_instr['instructor_id']] === undefined) {
-                //instructors[current_instr['instructor_id']] = [];
-                instructors[current_instr['instructor_id']] = current_instr;
+                obj = {};
+                obj.fName = current_instr['instructor_fName'];
+                obj.lName = current_instr['instructor_lName'];
+                obj.id = current_instr['instructor_id'];
+                obj.classes = [];
+
+                instructors[current_instr['instructor_id']] = obj;
             }
         });
     }
     return instructors;
 }
 
-function findInstructorCourses(courses) {}
-
-
 function organizeCourses (instructors, courses) {
+    // This function pulls the relevant information from the courses object
+    // and arranges them in the desired format. In addition it logs related instructors
+    // before returning a modified instructors array of objects.
     for (let course in courses) {
-        let course_instr = [];
-        let org_courses = [];
+        var course_instr = [];
+        var org_courses = [];
 
         let current_course = courses[course];
-        console.log("dogs: ", current_course)
         let course_components = courses[course]['components'];
 
         course_components.forEach(function (current_comp) {
@@ -46,27 +46,25 @@ function organizeCourses (instructors, courses) {
             let current_class = current['class_number'];
             course_instr.push(current['instructors'][0]['instructor_id']);
             org_courses[current_class] = {
-                    Subject: current_course['subject'],
-                    Catalog: current_course['catalog'],
-                    Section: current_comp['section'],
-                    Component: current_comp,
-                    Title: current_course['course_title'],
-                    Instructor: current['instructors'][0]['instructor_lName'] + ", " + current['instructors'][0]['instructor_fName'],
-                    WTU: current['instructors'][0]['wtu'],
-                    Units: current_course['units'],
-                    Pattern: current['meeting_pattern'][0]['meeting_pattern'],
-                    Start: current['meeting_pattern'][0]['start_time'],
-                    End: current['meeting_pattern'][0]['end_time'],
-                    Room: current['meeting_pattern'][0]['facility_name'],
-                    Enrollment: current_course['total_enrolled'],
-                    FTES: current_course['ftes']
+                Subject: current_course['subject'],
+                Catalog: current_course['catalog'],
+                Section: current_comp['section'],
+                Component: current_comp,
+                Title: current_course['course_title'],
+                Instructor: current['instructors'][0]['instructor_lName'] + ", " + current['instructors'][0]['instructor_fName'],
+                WTU: current['instructors'][0]['wtu'],
+                Units: current_course['units'],
+                Pattern: current['meeting_pattern'][0]['meeting_pattern'],
+                Start: current['meeting_pattern'][0]['start_time'],
+                End: current['meeting_pattern'][0]['end_time'],
+                Room: current['meeting_pattern'][0]['facility_name'],
+                Enrollment: current_course['total_enrolled'],
+                FTES: current_course['ftes']
             };
         });
-
         course_instr.forEach(function(current_id) {
-            console.log(instructors[current_id]);
-            org_courses.forEach(function (current_class) {
-                instructors[current_id] += org_courses[current_class];
+            org_courses.forEach(function (current_class, index) {
+                instructors[current_id].classes.push(org_courses[index]);
             });
         });
 
@@ -77,8 +75,17 @@ function organizeCourses (instructors, courses) {
 const contents = fs.readFileSync('./courses_studentView_2193_ComputerScience.json', 'utf8');
 let courses = JSON.parse(contents);
 
-let totalStudents = cacluateTotalStudentsEnrolled(courses);
 let cs_instructors = findAllInstructors(courses);
-let org_courses = organizeCourses(cs_instructors, courses);
+let instr_courses = organizeCourses(cs_instructors, courses);
 
-console.log(org_courses);
+// the following line is modified from: https://stackoverflow.com/questions/957537/how-can-i-display-a-javascript-object
+let str = JSON.stringify(instr_courses, null, 4); // (Optional) beautiful indented output.
+console.log(str);
+fs.writeFile("instr_courses.json", str, function(err) {
+    if(err) {
+        return console.log(err);
+    }
+
+    console.log("The file was saved!");
+});
+//console.log(instr_courses);
